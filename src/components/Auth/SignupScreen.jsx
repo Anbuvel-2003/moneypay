@@ -52,36 +52,66 @@ const SignupScreen = () => {
       setError("Passwords do not match.");
       return;
     }
-
     try {
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Generate random 16-digit account number
-      const accountNumber = generateRandomAccountNumber();
-
-      // Store user data in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        username,
-        mobile,
-        email,
-        accountNumber,
-        accountBalance: 0, // Default account balance
-        role: "user", // Default role
-        createdAt: new Date().toISOString(),
-      });
-
-      setSuccess("Account created successfully!");
-      setTimeout(() => navigate("/pages/HomePage"), 2000);
-    } catch (err) {
-      // Handle Firebase errors
-      const errorMessage =
-        err.code === "auth/email-already-in-use"
-          ? "Email is already registered."
-          : err.message;
-      setError(errorMessage);
+      const userid = uuidv4();
+      async function generateRandomNumber(length) {
+        if (length !== 14 && length !== 16 && length !== 3) {
+          throw new Error("Length must be 14 or 16");
+        }
+        const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        await delay(100);
+        const digits = Array.from({ length }, () =>
+          Math.floor(Math.random() * 10)
+        ).join("");
+        console.log("Generated Random Number:", digits, "max", length);
+        return parseInt(digits);
+      }
+      async function generateExpiryDate() {
+        const currentDate = new Date();
+        const randomYear =
+          currentDate.getFullYear() + Math.floor(Math.random() * 16) + 15;
+        const randomMonth = Math.floor(Math.random() * 12) + 1;
+        const expiryDate = `${randomMonth
+          .toString()
+          .padStart(2, "0")}/${randomYear.toString().slice(-2)}`;
+        console.log("expiryDate", expiryDate);
+        return expiryDate;
+      }
+      const Register_User = {
+        id: userid,
+        Email: email,
+        Password: password,
+        phonenumber: parseInt(mobile),
+        username: username,
+        Is_Admin: false,
+      };
+      const Account_data = {
+        id: userid,
+        // useRef: firestore().collection('Register_User').doc(userid),
+        paylist: [],
+        Balance: 0,
+        Accountdetails: {
+          AccountNumber: await generateRandomNumber(14),
+          AccountName: name,
+          AccountType: "Savings",
+          AccountStatus: "Active",
+          Cvv: await generateRandomNumber(3),
+          ExpiryDate: await generateExpiryDate(),
+          Cardnumber: await generateRandomNumber(16),
+        },
+      };
+      const userDocRef = doc(db, "Register_User", userid);
+      await setDoc(userDocRef, Register_User);
+      const AccountDocRef = doc(db, "Account_data", userid);
+      await setDoc(AccountDocRef, Account_data);
+      console.log("Document written with ID: ", userDocRef.id);
+      console.log("Document written with ID: ", AccountDocRef.id);
+      console.log("AccountDocRef", AccountDocRef);
+      if (AccountDocRef?.id && userDocRef?.id) {
+        navigate("/Homescreen");
+      }
+    } catch (error) {
+      console.log("Catch in signup", error);
     }
   };
 

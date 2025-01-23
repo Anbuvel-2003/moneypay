@@ -8,8 +8,8 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebaseConfig"; // Ensure firebaseConfig is correctly set up
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../firebaseConfig";// Ensure firebaseConfig is correctly set up
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -47,46 +47,42 @@ const LoginScreen = () => {
     });
 
     return () => unsubscribe();
-  }, [auth, navigate]);
+  }, [auth]);
 
   // Handle user login
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (isLoading) return; // Prevent multiple submissions
-
-    setError("");
+    if (isLoading) return;
     setIsLoading(true);
-
     if (!email || !password) {
       setError("Please fill in all fields.");
       setIsLoading(false);
       return;
     }
-
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Fetch user role from Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const { role } = userDoc.data();
-
-        if (role === "admin") {
-          navigate("pages/Admin/AdminPanel");
-        } else if (role === "user") {
-          navigate("/pages/HomePage");
+      const userQuery = query(
+        collection(db, "Register_User"),
+        where("Email", "==", email)
+      );
+      const querySnapshot = await getDocs(userQuery);
+      if (!querySnapshot?.empty) {
+        const user = querySnapshot.docs[0].data();
+        if (user?.Password == password) {
+          console.log(user,"l,,,");
+          localStorage.setItem("USER_ID", user?.id);
+          navigate("/homepage");
         } else {
-          setError("Unauthorized role. Please contact support.");
+          alert("Incorrect password. Please try again.");
         }
       } else {
-        setError("User data not found. Please contact support.");
+        alert("No user found with this email.");
       }
     } catch (err) {
       const errorMessages = {
         "auth/user-not-found": "No user found with this email.",
         "auth/wrong-password": "Incorrect password. Please try again.",
-        "auth/too-many-requests": "Too many unsuccessful attempts. Please try again later.",
+        "auth/too-many-requests":
+          "Too many unsuccessful attempts. Please try again later.",
       };
       setError(errorMessages[err.code] || "An unexpected error occurred.");
     } finally {
@@ -109,7 +105,7 @@ const LoginScreen = () => {
       .catch((error) => {
         console.error("Error during logout:", error.message);
       });
-  }, [auth, navigate]);
+  }, [auth]);
 
   // Reset inactivity timer
   // const resetInactivityTimer = useCallback(() => {
