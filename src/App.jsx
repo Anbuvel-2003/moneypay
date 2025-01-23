@@ -62,7 +62,7 @@ const App = () => {
           {/* Protected Routes */}
           <Route
             path="/*"
-            element={isAuthenticated ? <BottomTabs /> : <Navigate to="/login" />}
+            element={isAuthenticated || localStorage.getItem('USER_ID') ? <BottomTabs /> : <Navigate to="/login" />}
           />
 
           {/* Catch-all Route */}
