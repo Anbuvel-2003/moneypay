@@ -64,7 +64,7 @@ const BottomTabs = () => {
       <div className="flex-grow">
         <Routes>
           {/* Shared routes */}
-          <Route path="/" element={<HomePage />} />
+          <Route path="/homepage" element={<HomePage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/qrscan" element={<QRScanPage />} />
           <Route path="/rewards" element={<RewardsPage />} />
