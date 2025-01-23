@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  FaUserEdit,
-  FaTrashAlt,
-  FaUserShield,
   FaPaperPlane,
   FaDownload,
   FaBolt,
@@ -12,11 +9,11 @@ import {
   FaMobileAlt,
   FaPlane,
   FaShoppingCart,
-  FaTicketAlt,
+  FaTicketAlt
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 const AdminHome = () => {
   const [adminData, setAdminData] = useState(null);
