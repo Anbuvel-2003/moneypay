@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye, faEyeSlash, faUser, faPhone } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../firebaseConfig"; // Ensure this path points to your Firebase config
+import { emailRegex } from "../../utils/regex";
 
 const SignupScreen = () => {
   const [username, setUsername] = useState("");
@@ -107,6 +108,8 @@ const SignupScreen = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                max={20}
+                maxLength={20}
               />
             </div>
           </div>
@@ -119,12 +122,14 @@ const SignupScreen = () => {
                 <FontAwesomeIcon icon={faPhone} />
               </span>
               <input
-                type="text"
+                type="number"
                 placeholder="Mobile Number"
                 className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-900 outline-none"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
                 required
+                max={10}
+                maxLength={10}
               />
             </div>
           </div>
@@ -145,6 +150,7 @@ const SignupScreen = () => {
                 required
               />
             </div>
+            {!(emailRegex.test(email)) && email.length > 5 && <p className="text-red-700 text-xs p-2">Enter Valid Email Address</p>}
           </div>
 
           {/* Password Field */}

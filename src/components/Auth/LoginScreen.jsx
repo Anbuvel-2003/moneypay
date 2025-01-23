@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig"; // Ensure firebaseConfig is correctly set up
+import { emailRegex } from "../../utils/regex";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -143,11 +144,15 @@ const LoginScreen = () => {
           Sign in with your email and password
         </p>
 
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
 
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Email Address
+            </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                 <FontAwesomeIcon icon={faEnvelope} />
@@ -159,12 +164,17 @@ const LoginScreen = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                max={50}
+                maxLength={50}
               />
             </div>
+            {!(emailRegex.test(email)) && email.length > 5 && <p className="text-red-700 text-xs p-2">Enter Valid Email Address</p>}
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Password
+            </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-600">
                 <FontAwesomeIcon icon={faLock} />
@@ -189,7 +199,9 @@ const LoginScreen = () => {
           <button
             type="submit"
             className={`w-full py-2 text-white rounded-lg transition ${
-              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-pink-800 hover:bg-pink-900"
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-pink-800 hover:bg-pink-900"
             }`}
             disabled={isLoading}
           >

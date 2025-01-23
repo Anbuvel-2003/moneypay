@@ -29,7 +29,7 @@ const App = () => {
       const timer = setTimeout(() => {
         setLoading(false);
         sessionStorage.setItem("splashScreenShown", "true"); // Prevent splash screen from showing again
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timer);
     }

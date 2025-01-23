@@ -4,10 +4,7 @@ import {
   FaHome,
   FaHistory,
   FaQrcode,
-  FaGift,
-  FaUser,
-  FaCogs,
-  FaUserCircle,
+  FaGift, FaUserCircle
 } from "react-icons/fa";
 
 // Import pages
@@ -26,11 +23,12 @@ import AdminPanel from "../pages/Admin/AdminPanel";
 import AdminHome from "../pages/Admin/AdminHome";
 import AdminProfile from "../pages/Admin/AdminProfile";
 import AdminSendMoney from "../pages/Admin/AdminSendMoney";
-import  VerifyKYC from "../pages/Admin/VerifyKYC";
+import VerifyKYC from "../pages/Admin/VerifyKYC";
 
 const BottomTabs = () => {
   const location = useLocation();
 
+  // Simulate user role (e.g., fetched from auth context or state)
   const userRole = "admin"; // Change this to "user" for regular user
 
   // Function to check if a tab is active
