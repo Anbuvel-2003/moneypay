@@ -4,57 +4,56 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig"; // Ensure correct path to your Firebase config
 
 const YourProfilePage = () => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        try {
-          // Fetch user data from Firestore
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setName(userData.username || "");
-            setEmail(userData.email || "");
-            setPhoneNumber(userData.mobile || ""); // Assuming 'mobile' is the field in Firestore
-          } else {
-            console.warn("User document not found in Firestore.");
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error.message);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [user]);
-
-  const handleUpdateProfile = async (event) => {
-    event.preventDefault();
-
+  const [userdata, setUserdata] = useState(null);
+  const [account, setAccount] = useState(null);
+  const getUserData = async () => {
     try {
-      // Update user displayName in Firebase Authentication
-      if (user) {
-        await updateProfile(user, { displayName: name });
+      const USER_ID = localStorage.getItem("USER_ID");
+
+      if (USER_ID) {
+        const userDocRef = doc(db, "Register_User", USER_ID);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const user = userDoc.data();
+          console.log("User Data in profile:", user);
+          setUserdata(user);
+          const accountDocRef = doc(db, "Account_data", USER_ID);
+          const accountDoc = await getDoc(accountDocRef);
+          if (accountDoc.exists()) {
+            const account = accountDoc.data();
+            console.log("Account Data: in PRofile", account);
+            setAccount(account);
+          } else {
+            console.log("No account data found for this user.");
+          }
+        } else {
+          console.log("No user data found for this user ID.");
+        }
+      } else {
+        console.log("USER_ID not found in localStorage.");
       }
-
-      // Update user data in Firestore
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        username: name,
-        mobile: phoneNumber,
-      });
-
-      alert("Profile updated successfully!");
     } catch (error) {
-      console.error("Error updating profile:", error.message);
+      console.error("Error in getUserData:", error);
     }
   };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
+  const handleUpdateProfile = async (e) => {
+    try {
+
+      
+    } catch (error) {
+    console.log("CATCH IN HANDLEUPDATEPROFILE", error);
+      
+    }
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen p-4">
@@ -89,6 +88,7 @@ const YourProfilePage = () => {
           <input
             type="tel"
             value={phoneNumber}
+            maxLength={10}
             onChange={(e) => setPhoneNumber(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter your mobile number"

@@ -6,7 +6,7 @@ import {
   collection,
   getDocs,
   query,
-  where,
+  orderBy,
 } from "firebase/firestore";
 
 const HistoryPage = () => {
@@ -15,61 +15,33 @@ const HistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchUserDataAndTransactions = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const userId = "USER_ID"; // Replace with actual user ID (e.g., from authentication)
-
-        // Fetch user data
-        const userDoc = doc(db, "users", userId);
-        const userSnapshot = await getDoc(userDoc);
-
-        if (!userSnapshot.exists()) {
-          throw new Error("User not found.");
+  const getdata = async () => {
+    try {
+      const USER_ID = localStorage.getItem("USER_ID");
+      if (USER_ID) {
+        try {
+          const userDocRef = doc(db, "History", USER_ID);
+          const dataCollectionRef = collection(userDocRef, "data");
+          const q = query(dataCollectionRef, orderBy("data", "desc"));
+          const querySnapshot = await getDocs(q);
+          const data = querySnapshot.docs.map((doc) => doc.data());
+          console.log("data", data);
+          const sortedData = data.sort(
+            (a, b) => new Date(b.data) - new Date(a.data)
+          );
+          setTransactions(sortedData);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
-
-        const user = userSnapshot.data();
-        setUserData(user);
-
-        // Fetch transaction data
-        const transactionsQuery = query(
-          collection(db, "transactions"),
-          where("userId", "==", userId)
-        );
-        const transactionsSnapshot = await getDocs(transactionsQuery);
-
-        const transactionsList = transactionsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Fetch manual updates (received from "European Space Agency")
-        const manualUpdates = user.manualUpdates || []; // If stored as an array in user document
-        const formattedManualUpdates = manualUpdates.map((update) => ({
-          type: "received",
-          source: "European Space Agency",
-          date: update.date,
-          amount: update.amount,
-        }));
-
-        // Combine transactions and manual updates
-        const combinedTransactions = [...transactionsList, ...formattedManualUpdates];
-
-        // Sort by date (assuming date is in a comparable format like ISO 8601)
-        combinedTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        setTransactions(combinedTransactions);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      } else {
+        console.log("User ID not found in localStorage.");
       }
-    };
-
-    fetchUserDataAndTransactions();
+    } catch (error) {
+      console.log("CATCH IN GETDATA", error);
+    }
+  };
+  useEffect(() => {
+    getdata();
   }, []);
 
   return (
@@ -90,7 +62,8 @@ const HistoryPage = () => {
           ) : (
             <>
               <p className="text-gray-800">
-                Hello, <span className="text-pink-900 font-bold">{userData.name}</span>
+                Hello,{" "}
+                <span className="text-pink-900 font-bold">{userData.name}</span>
               </p>
               <p className="text-gray-600">Your Balance</p>
               <h2 className="text-xl font-bold text-gray-800">
@@ -102,7 +75,9 @@ const HistoryPage = () => {
 
         {/* Transaction History */}
         <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Transaction History</h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-4">
+            Transaction History
+          </h2>
           {loading ? (
             <p>Loading transactions...</p>
           ) : error ? (
@@ -130,7 +105,9 @@ const HistoryPage = () => {
                           : "Money Received"
                         : "Money Withdrawn"}
                     </p>
-                    <p className="text-gray-600 text-xs">Date: {transaction.date}</p>
+                    <p className="text-gray-600 text-xs">
+                      Date: {transaction.date}
+                    </p>
                     {transaction.type === "withdrawn" && (
                       <p className="text-sm text-gray-600">
                         Transfer Account: {transaction.transferAccount}
