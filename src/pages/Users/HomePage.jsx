@@ -75,7 +75,7 @@ const HomePage = () => {
           </p>
           <p className="text-gray-600">Your Account Balance</p>
           <h2 className="text-xl font-bold text-gray-800">
-            {/* ₹ {userData.accountBalance.toLocaleString()} */}{account?.Balance}
+            {/* ₹ {userData.accountBalance.toLocaleString()} */}₹ {account?.Balance?.toLocaleString('en-IN')}
           </h2>
         </div>
       </div>
@@ -113,7 +113,7 @@ const HomePage = () => {
           </div>
           <div className="mt-2">
             <p className="text-lg font-bold">
-            {`₹ ${account?.Balance}`}
+            {`₹ ${account?.Balance?.toLocaleString('en-IN')}`}
             </p>
           </div>
         </div>
