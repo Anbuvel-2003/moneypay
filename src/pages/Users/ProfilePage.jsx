@@ -14,39 +14,42 @@ const ProfilePage = () => {
     profileImage: "../../images/icon.png", // Default placeholder image
     accountNumber: "•••• •••• •••• ••••", // Placeholder account number
   });
-  const [newProfileImage, setNewProfileImage] = useState(null); // For the uploaded image
-  const [loading, setLoading] = useState(false);
+  const [userdata, setUserdata] = useState(null);
+  const [account, setAccount] = useState(null);
+  const getUserData = async () => {
+    try {
+      const USER_ID = localStorage.getItem("USER_ID");
 
-  const auth = getAuth();
-  const user = auth.currentUser;
-
-  // Fetch user details from Firestore
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (user) {
-        try {
-          // Fetch user details from Firestore
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setUserDetails({
-              name: data.username || "User",
-              email: data.email || "No Email",
-              profileImage: data.profileImage || "../../images/icon.png",
-              accountNumber: data.accountNumber || "•••• •••• •••• ••••",
-            });
+      if (USER_ID) {
+        const userDocRef = doc(db, "Register_User", USER_ID);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const user = userDoc.data();
+          console.log("User Data in profile:", user);
+          setUserdata(user);
+          const accountDocRef = doc(db, "Account_data", USER_ID);
+          const accountDoc = await getDoc(accountDocRef);
+          if (accountDoc.exists()) {
+            const account = accountDoc.data();
+            console.log("Account Data: in PRofile", account);
+            setAccount(account);
           } else {
-            console.warn("User document not found in Firestore.");
+            console.log("No account data found for this user.");
           }
-        } catch (error) {
-          console.error("Error fetching user details:", error.message);
+        } else {
+          console.log("No user data found for this user ID.");
         }
+      } else {
+        console.log("USER_ID not found in localStorage.");
       }
-    };
+    } catch (error) {
+      console.error("Error in getUserData:", error);
+    }
+  };
 
-    fetchUserDetails();
-  }, [user]);
-
+  useEffect(() => {
+    getUserData();
+  }, []);
   // Handle logout
   const handleLogout = async () => {
     try {
@@ -100,7 +103,10 @@ const ProfilePage = () => {
             alt="Profile"
             className="rounded-full w-16 h-16 object-cover"
           />
-          <label htmlFor="file-upload" className="absolute bottom-0 right-0 bg-pink-900 p-1 rounded-full cursor-pointer">
+          <label
+            htmlFor="file-upload"
+            className="absolute bottom-0 right-0 bg-pink-900 p-1 rounded-full cursor-pointer"
+          >
             <FaCamera size={20} className="text-white" />
           </label>
           <input
@@ -112,9 +118,11 @@ const ProfilePage = () => {
           />
         </div>
         <div>
-          <h2 className="text-lg font-bold">{userDetails.name}</h2>
-          <p>{userDetails.email}</p>
-          <p className="text-sm text-gray-300">{userDetails.accountNumber}</p>
+          <h2 className="text-lg font-bold">{userdata?.username}</h2>
+          <p>{userdata?.Email}</p>
+          <p className="text-sm text-gray-300">
+           Account Number: {account?.Accountdetails?.AccountNumber}
+          </p>
         </div>
       </div>
 

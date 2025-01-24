@@ -36,7 +36,7 @@ const BottomTabs = () => {
 
   // Shared tabs for both admin and regular users
   const sharedTabs = [
-    { path: "/", label: "Home", icon: <FaHome size={24} /> },
+    { path: "/homepage", label: "Home", icon: <FaHome size={24} /> },
     { path: "/history", label: "History", icon: <FaHistory size={24} /> },
     { path: "/qrscan", label: "QR Scan", icon: <FaQrcode size={24} /> },
     { path: "/rewards", label: "Rewards", icon: <FaGift size={24} /> },
@@ -44,12 +44,12 @@ const BottomTabs = () => {
 
   // Admin-specific tabs
   const adminTabs = [
-    { path: "/Admin/Admin-home", label: "Home", icon: <FaHome size={24} /> },
+    { path: "/homepage", label: "Home", icon: <FaHome size={24} /> },
     { path: "/history", label: "History", icon: <FaHistory size={24} /> },
     { path: "/qrscan", label: "QR Scan", icon: <FaQrcode size={24} /> },
     { path: "/rewards", label: "Rewards", icon: <FaGift size={24} /> },
     {
-      path: "/Admin/Admin-profile",
+      path: "/profile",
       label: "Profile",
       icon: <FaUserCircle size={24} />,
     },
