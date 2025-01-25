@@ -104,7 +104,7 @@ const BottomTabs = () => {
               </div>
               <span
                 className={`text-xs mt-1 transition ${
-                  isActive(tab.path) ? "font-medium" : ""
+                  isActive(tab.path) ? "font-medium text-white" : ""
                 }`}
               >
                 {tab.label}

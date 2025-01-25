@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { doc, getDocs, collection, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { Switch } from "@radix-ui/react-switch";
+import { FaToggleOff, FaToggleOn } from "react-icons/fa";
 
 const VerifyKYC = () => {
   const [users, setUsers] = useState([]);
@@ -9,22 +11,30 @@ const VerifyKYC = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch all users and their KYC data
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const userCollection = collection(db, "users");
-        const userDocs = await getDocs(userCollection);
-        const userList = userDocs.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setUsers(userList);
-      } catch (error) {
-        console.error("Error fetching users:", error.message);
-      }
-    };
+  const getData = async () => {
+    try {
+      // Reference the "KYC" collection
+      const querySnapshot = await getDocs(collection(db, "KYC"));
 
-    fetchUsers();
+      // Map through the documents to extract data
+      const dataArray = querySnapshot.docs.map((documentSnapshot) => ({
+        id: documentSnapshot.id, // Include the document ID
+        ...documentSnapshot.data(), // Spread the document data
+      }));
+
+      console.log("Total users:", dataArray.length);
+      console.log("Fetched Data:", dataArray);
+
+      // Update state (assuming you're using useState for state management)
+      setUsers(dataArray); // Replace ⁠ setdata ⁠ with your actual state updater function
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // Fetch data when the component mounts
+  useEffect(() => {
+    getData();
   }, []);
 
   // Handle KYC Verification
@@ -55,6 +65,24 @@ const VerifyKYC = () => {
       console.error("Error verifying KYC:", error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getChange = async (val, id) => {
+    try {
+      // Reference the specific document in the "KYC" collection
+      const docRef = doc(db, "KYC", id);
+  
+      // Update the ⁠ is_Verified ⁠ field
+      await updateDoc(docRef, {
+        is_Verified: val,
+      });
+  
+      // Re-fetch the data after the update
+      getData(); // Ensure ⁠ getData ⁠ is your function for fetching the updated data
+      console.log("Document updated successfully!");
+    } catch (error) {
+      console.error("Error updating document:", error.message);
     }
   };
 
@@ -92,7 +120,7 @@ const VerifyKYC = () => {
               {/* Show KYC Document Status */}
               <p className="text-sm text-gray-600">
                 KYC Status:{" "}
-                {user.kycVerified ? (
+                {user.is_Verified ? (
                   <span className="text-green-600">Verified</span>
                 ) : (
                   <span className="text-red-600">Pending</span>
@@ -101,21 +129,24 @@ const VerifyKYC = () => {
 
               {/* Display KYC details if available */}
               <div className="mt-2">
-                <p><strong>PAN Card Number:</strong> {user.panCard || "Not Provided"}</p>
-                <p><strong>Aadhar Card Number:</strong> {user.aadharCard || "Not Provided"}</p>
-                <p><strong>Passport Number:</strong> {user.passportNumber || "Not Provided"}</p>
+                <p>
+                  <strong>PAN Card Number:</strong>{" "}
+                  {user.pannumber || "Not Provided"}
+                </p>
+                <p>
+                  <strong>Aadhar Card Number:</strong>{" "}
+                  {user.aadharnumber || "Not Provided"}
+                </p>
+                <p>
+                  <strong>Passport Number:</strong>{" "}
+                  {user.passportnumber || "Not Provided"}
+                </p>
               </div>
             </div>
-
-            {/* Verify Button */}
-            {!user.kycVerified && (
-              <button
-                onClick={() => handleVerifyKYC(user.id)}
-                disabled={loading}
-                className="bg-pink-900 text-white py-2 px-4 rounded"
-              >
-                {loading ? "Verifying..." : "Verify KYC"}
-              </button>
+            {user?.is_Verified ? (
+              <FaToggleOn className="text-4xl text-[#831743] cursor-pointer" onClick={() => getChange(false, user?.userid)}/>
+            ) : (
+              <FaToggleOff className="text-4xl text-[#831743] cursor-pointer" onClick={() => getChange(true, user?.userid)}/>
             )}
           </div>
         ))}

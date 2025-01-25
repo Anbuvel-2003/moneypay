@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { db } from "../../firebaseConfig";
 import { doc, collection, setDoc, getDocs } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
+import { IoReturnUpBackOutline } from "react-icons/io5";
 
 const AddAccountPage = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +40,10 @@ const AddAccountPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({
+      ...formData,
+      [name]: name === "ifscCode" ? value.toUpperCase() : value,
+    });
   };
 
   const handleSubmit = async (event) => {
@@ -109,17 +113,20 @@ const AddAccountPage = () => {
         ifsccode: "",
       });
       alert("Account added successfully!");
-      navigation.goBack(); // Navigate back (if using React Router or similar)
+      setShowForm(false);
+      fetchAccounts();
     } catch (error) {
       console.error("Error adding account:", error.message);
-      alert("Failed to add account. Please try again.");
     } finally {
       setLoading(false); // Hide loading indicator
     }
   };
   return (
     <div className="bg-gray-100 min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">Add Account</h1>
+      <h1 className="text-2xl font-bold mb-4 flex items-center gap-4 cursor-pointer">
+        <IoReturnUpBackOutline onClick={() => window.history.back()} />
+        Add Account
+      </h1>
 
       {/* Display Existing Accounts */}
       <div className="mb-6">
@@ -174,6 +181,8 @@ const AddAccountPage = () => {
               placeholder="Enter account holder name"
               className="w-full p-2 border rounded"
               required
+              max={30}
+              maxLength={30}
             />
           </div>
 
@@ -193,17 +202,19 @@ const AddAccountPage = () => {
               maxLength={16}
             />
           </div>
-
           {/* Confirm Account Number */}
           <div className="mb-4">
             <label className="block text-gray-700 font-bold mb-2">
               Confirm Account Number
             </label>
             <input
-              type="text"
+            maxLength={16}
+              type="number"
               name="confirmAccountnumber"
               value={formData.confirmAccountnumber}
-              onChange={handleChange}
+              onChange={(e) =>
+                e.target.value.length <= 16 ? handleChange(e) : null
+              }
               placeholder="Re-enter account number"
               className="w-full p-2 border rounded"
               required
@@ -240,6 +251,7 @@ const AddAccountPage = () => {
               placeholder="Enter bank name"
               className="w-full p-2 border rounded"
               required
+              maxLength={40}
             />
           </div>
 

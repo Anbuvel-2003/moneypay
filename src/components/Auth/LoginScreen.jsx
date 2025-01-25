@@ -19,40 +19,10 @@ const LoginScreen = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const inactivityTimeout = useRef(null);
 
-  const auth = getAuth();
-
-  // Check if user is already logged in
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const { role } = userDoc.data();
-            if (role === "admin") {
-              navigate("pages/Admin/Admin-home");
-            } else if (role === "user") {
-              navigate("/pages/HomePage");
-            } else {
-              setError("Unauthorized role. Please contact support.");
-            }
-          } else {
-            setError("User data not found. Please contact support.");
-          }
-        } catch (err) {
-          setError("An error occurred while fetching user data.");
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, [auth]);
 
   // Handle user login
   const handleLogin = async (e) => {
-    e.preventDefault();
     if (isLoading) return;
     setIsLoading(true);
     if (!email || !password) {
@@ -96,42 +66,6 @@ const LoginScreen = () => {
     setShowPassword((prevState) => !prevState);
   }, []);
 
-  // Logout function
-  const logout = useCallback(() => {
-    signOut(auth)
-      .then(() => {
-        alert("Logged out due to inactivity.");
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.error("Error during logout:", error.message);
-      });
-  }, [auth]);
-
-  // Reset inactivity timer
-  // const resetInactivityTimer = useCallback(() => {
-  //   if (inactivityTimeout.current) clearTimeout(inactivityTimeout.current);
-  //   inactivityTimeout.current = setTimeout(logout, 5 * 60 * 1000); // 5 minutes
-  // }, [logout]);
-
-  // // Add activity listeners
-  // useEffect(() => {
-  //   const handleActivity = () => resetInactivityTimer();
-
-  //   window.addEventListener("mousemove", handleActivity);
-  //   window.addEventListener("keypress", handleActivity);
-  //   window.addEventListener("touchstart", handleActivity);
-
-  //   resetInactivityTimer();
-
-  //   return () => {
-  //     window.removeEventListener("mousemove", handleActivity);
-  //     window.removeEventListener("keypress", handleActivity);
-  //     window.removeEventListener("touchstart", handleActivity);
-  //     if (inactivityTimeout.current) clearTimeout(inactivityTimeout.current);
-  //   };
-  // }, [resetInactivityTimer]);
-
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-sm bg-white p-6 rounded-lg shadow-md">
@@ -144,7 +78,10 @@ const LoginScreen = () => {
           <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={e => {
+          e.preventDefault()
+          handleLogin()
+        }} action={null}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-400 mb-1">
               Email Address
@@ -156,7 +93,7 @@ const LoginScreen = () => {
               <input
                 type="email"
                 placeholder="Email Address"
-                className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-900 outline-none"
+                className="w-full pl-10 pr-3 py-2 border rounded-lg"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
