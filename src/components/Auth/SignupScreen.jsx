@@ -6,6 +6,7 @@ import { faEnvelope, faLock, faEye, faEyeSlash, faUser, faPhone } from "@fortawe
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../firebaseConfig"; // Ensure this path points to your Firebase config
 import { emailRegex } from "../../utils/regex";
+import { v4 as uuidv4 } from "uuid";
 
 const SignupScreen = () => {
   const [username, setUsername] = useState("");
@@ -93,7 +94,7 @@ const SignupScreen = () => {
         Balance: 0,
         Accountdetails: {
           AccountNumber: await generateRandomNumber(14),
-          AccountName: name,
+          AccountName: username,
           AccountType: "Savings",
           AccountStatus: "Active",
           Cvv: await generateRandomNumber(3),
@@ -156,9 +157,8 @@ const SignupScreen = () => {
                 placeholder="Mobile Number"
                 className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-900 outline-none"
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                onChange={(e) => e.target.value.length <=10 ? setMobile(e.target.value) : null}
                 required
-                max={10}
                 maxLength={10}
               />
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaPlus, FaLock, FaSignOutAlt, FaCamera } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig"; // Ensure the correct path to your Firebase config
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -47,13 +47,16 @@ const ProfilePage = () => {
     }
   };
 
+  console.log(userdata,"userdata12345");
+
   useEffect(() => {
     getUserData();
   }, []);
   // Handle logout
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      localStorage.clear()
+      sessionStorage.clear()
       console.log("User logged out successfully");
       navigate("/login"); // Redirect to login page
     } catch (error) {
@@ -121,7 +124,7 @@ const ProfilePage = () => {
           <h2 className="text-lg font-bold">{userdata?.username}</h2>
           <p>{userdata?.Email}</p>
           <p className="text-sm text-gray-300">
-           Account Number: {account?.Accountdetails?.AccountNumber}
+            Account Number: {account?.Accountdetails?.AccountNumber}
           </p>
         </div>
       </div>
@@ -133,7 +136,9 @@ const ProfilePage = () => {
           onClick={() => navigate("/your-profile")}
         >
           <FaUser className="text-pink-900 mr-4" size={20} />
-          <p className="text-gray-800">Your Profile</p>
+          <p className="text-gray-800">
+            <i class="fi fi-tr-left"></i>Your Profile
+          </p>
         </div>
         <div
           className="flex items-center p-4 bg-white shadow-md cursor-pointer mt-2"
@@ -146,10 +151,14 @@ const ProfilePage = () => {
         {/* KYC Verification */}
         <div
           className="flex items-center p-4 bg-white shadow-md cursor-pointer mt-2"
-          onClick={() => navigate("/kyc")}
+          onClick={() =>
+            navigate(`/${userdata.Is_Admin ? "Admin/Verify-kyc" : "kyc"}`)
+          }
         >
           <FaUser className="text-pink-900 mr-4" size={20} />
-          <p className="text-gray-800">KYC Verification</p>
+          <p className="text-gray-800">
+            {userdata?.Is_Admin ? "Admin KYC Verification" : "KYC Verification"}
+          </p>
         </div>
 
         <div
@@ -164,7 +173,9 @@ const ProfilePage = () => {
           onClick={handleLogout}
         >
           <FaSignOutAlt className="text-pink-900 mr-4" size={20} />
-          <p className="text-gray-800">Log Out</p>
+          <p className="text-gray-800" onClick={handleLogout}>
+            Log Out
+          </p>
         </div>
       </div>
     </div>

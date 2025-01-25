@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { IoReturnUpBackOutline } from "react-icons/io5";
 import { db } from "../../firebaseConfig"; // Ensure correct path to your Firebase config
 
 const YourProfilePage = () => {
@@ -57,7 +58,7 @@ const YourProfilePage = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
+      <h1 className="text-2xl font-bold mb-4 flex items-center gap-4 cursor-pointer"><IoReturnUpBackOutline onClick={() => window.history.back()}/> Your Profile</h1>
       <form onSubmit={handleUpdateProfile} className="bg-white p-4 rounded shadow-md">
         {/* Name Field */}
         <div className="mb-4">
@@ -68,6 +69,8 @@ const YourProfilePage = () => {
             onChange={(e) => setName(e.target.value)}
             className="w-full p-2 border rounded"
             required
+            max={30}
+            maxLength={30}
           />
         </div>
 
@@ -92,6 +95,8 @@ const YourProfilePage = () => {
             onChange={(e) => setPhoneNumber(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter your mobile number"
+            max={10}
+            maxLength={10}
           />
         </div>
 

@@ -11,6 +11,7 @@ import {
   FaCreditCard,
   FaEllipsisH,
 } from "react-icons/fa";
+import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
@@ -19,6 +20,7 @@ import { db } from "../../firebaseConfig";
 const HomePage = () => {
   const [userdata, setUserdata] = useState(null);
   const [account, setAccount] = useState(null);
+  const navigate = useNavigate()
 
   const handleServiceClick = (serviceName) => {
     alert(
@@ -71,11 +73,15 @@ const HomePage = () => {
       <div className="p-4">
         <div className="bg-white p-4 rounded-lg shadow-md">
           <p className="text-gray-800">
-            Hello, <span className="text-pink-900 font-bold">{userdata?.username}</span>
+            Hello,{" "}
+            <span className="text-pink-900 font-bold">
+              {userdata?.username}
+            </span>
           </p>
           <p className="text-gray-600">Your Account Balance</p>
           <h2 className="text-xl font-bold text-gray-800">
-            {/* ₹ {userData.accountBalance.toLocaleString()} */}₹ {account?.Balance?.toLocaleString('en-IN')}
+            {/* ₹ {userData.accountBalance.toLocaleString()} */}₹{" "}
+            {account?.Balance?.toLocaleString("en-IN")}
           </h2>
         </div>
       </div>
@@ -90,11 +96,24 @@ const HomePage = () => {
           Send Money
         </button>
         <button
-          onClick={() => navigate("/history")}
+          onClick={() =>
+            navigate(
+              `/${userdata?.Is_Admin ? "Admin/Admin-send-money" : "history"}`
+            )
+          }
           className="flex-1 bg-pink-900 text-white py-2 mx-2 rounded-lg shadow-md flex items-center justify-center"
         >
-          <FaDownload size={18} className="mr-2" />
-          Received
+          {userdata?.Is_Admin ? (
+            <>
+              <IoMdAddCircleOutline size={18} className="mr-2" />
+              Add Money
+            </>
+          ) : (
+            <>
+              <FaDownload size={18} className="mr-2" />
+              Received
+            </>
+          )}
         </button>
       </div>
 
@@ -105,15 +124,21 @@ const HomePage = () => {
           alt="Debit Card"
           className="w-full rounded-lg shadow-md"
         />
-        <div className="absolute top-16 left-10 text-white">
-          <p className="text-lg font-bold">
-          {`**** **** **** ${account?.Accountdetails?.AccountNumber?.toString()?.slice(-4)}`}          </p>
+        <div className="absolute bottom-16 left-10 text-white">
+          <p className="text-3xl font-bold max-md:text-sm">
+            {`**** **** **** ${account?.Accountdetails?.AccountNumber?.toString()?.slice(
+              -4
+            )}`}{" "}
+          </p>
           <div className="flex justify-between mt-2">
-            <p className="text-sm">  {`Expiry: ${account?.Accountdetails?.ExpiryDate}`}</p>
+            <p className="text-xl max-md:text-sm">
+              {" "}
+              {`Expiry: ${account?.Accountdetails?.ExpiryDate}`}
+            </p>
           </div>
           <div className="mt-2">
-            <p className="text-lg font-bold">
-            {`₹ ${account?.Balance?.toLocaleString('en-IN')}`}
+            <p className="text-5xl font-bold max-md:text-sm">
+              {`₹ ${account?.Balance?.toLocaleString("en-IN")}`}
             </p>
           </div>
         </div>
@@ -124,56 +149,58 @@ const HomePage = () => {
         <h2 className="text-lg font-bold text-gray-800 mb-4">Services</h2>
         <div className="grid grid-cols-4 gap-4">
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaTicketAlt size={24} className="text-pink-900" />
             <p className="text-sm mt-2 text-gray-800">Tickets</p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaBolt size={24} className="text-pink-900" />
             <p className="text-sm mt-2 text-gray-800">Electricity</p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaMobileAlt size={24} className="text-pink-900" />
             <p className="text-sm mt-2 text-gray-800">Recharge</p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaFilm size={24} className="text-pink-900" />
             <p className="text-sm mt-2 text-gray-800">Movie</p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaPlane size={24} className="text-pink-900" />
             <p className="text-sm mt-2 text-gray-800">Flight</p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaShoppingCart size={24} className="text-pink-900" />
             <p className="text-sm mt-2 text-gray-800">Shopping</p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer justify-center border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaCreditCard size={24} className="text-pink-900" />
-            <p className="text-sm mt-2 text-gray-800">Card Payment</p>
+            <p className="text-sm mt-2 text-gray-800 text-center">
+              Card Payment
+            </p>
           </div>
           <div
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer"
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center cursor-pointer border border-[#831743]"
             onClick={handleServiceClick}
           >
             <FaEllipsisH size={24} className="text-pink-900" />
