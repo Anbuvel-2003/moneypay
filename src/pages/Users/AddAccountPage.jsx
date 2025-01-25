@@ -1,44 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { getAuth } from "firebase/auth";
-import { collection, getDocs, doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { doc, collection, setDoc, getDocs } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 
 const AddAccountPage = () => {
   const [formData, setFormData] = useState({
-    accountHolderName: "",
-    accountNumber: "",
-    confirmAccountNumber: "",
-    ifscCode: "",
-    bankName: "",
+    Accountname: "",
+    Accountnumber: "",
+    confirmAccountnumber: "",
+    ifsccode: "",
+    Bankname: "",
   });
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-
-  const auth = getAuth();
-  const user = auth.currentUser;
-
   // Fetch accounts from Firestore
   useEffect(() => {
-    const fetchAccounts = async () => {
-      if (user) {
-        try {
-          const querySnapshot = await getDocs(
-            collection(db, "users", user.uid, "accounts")
-          );
-          const fetchedAccounts = [];
-          querySnapshot.forEach((doc) => {
-            fetchedAccounts.push(doc.data());
-          });
-          setAccounts(fetchedAccounts);
-        } catch (error) {
-          console.error("Error fetching accounts:", error.message);
-        }
-      }
-    };
-
     fetchAccounts();
-  }, [user]);
+  }, []);
+
+  const fetchAccounts = async () => {
+    const USER_ID = localStorage.getItem("USER_ID");
+    if (USER_ID) {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "Account", USER_ID, "data")
+        );
+        const fetchedAccounts = [];
+        querySnapshot.forEach((doc) => {
+          fetchedAccounts.push(doc.data());
+        });
+        setAccounts(fetchedAccounts);
+      } catch (error) {
+        console.error("Error fetching accounts:", error.message);
+      }
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,53 +43,80 @@ const AddAccountPage = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Prevent default form submission
 
-    const { accountNumber, confirmAccountNumber, accountHolderName, ifscCode, bankName } = formData;
+    const {
+      Accountname,
+      Accountnumber,
+      confirmAccountnumber,
+      Bankname,
+      ifsccode,
+    } = formData;
+
+    // Validation: Ensure all fields are filled
+    if (!Accountname || !Accountnumber || !Bankname || !ifsccode) {
+      alert("All fields are required");
+      return;
+    }
+
+    // Validation: Ensure Accountnumber is valid
+    if (Accountnumber.length < 8) {
+      alert("Account number is not valid");
+      return;
+    }
+
+    // Validation: Ensure IFSC code is valid
+    if (ifsccode.length !== 11) {
+      alert("IFSC code is not valid");
+      return;
+    }
 
     // Validation: Ensure account numbers match
-    if (accountNumber !== confirmAccountNumber) {
-      alert("Account numbers do not match. Please check again.");
+    if (Accountnumber !== confirmAccountnumber) {
+      alert("Account numbers do not match");
       return;
     }
 
-    if (!user) {
-      alert("User is not logged in. Please log in and try again.");
-      return;
-    }
+    setLoading(true); // Show loading indicator
 
-    setLoading(true);
+    const USER_ID = localStorage.getItem("USER_ID"); // Retrieve USER_ID from localStorage
+    const userid = uuidv4(); // Generate a unique ID for the account
+
     try {
       const accountData = {
-        accountHolderName,
-        accountNumber,
-        ifscCode,
-        bankName,
-        createdAt: new Date().toISOString(),
+        Accountname,
+        Accountnumber,
+        Bankname,
+        ifsccode,
+        userid: USER_ID,
+        _id: userid,
       };
 
-      // Save to Firestore
-      await setDoc(doc(db, "users", user.uid, "accounts", accountNumber), accountData);
+      console.log("Account Data:", accountData);
 
-      // Update UI
-      setAccounts([...accounts, accountData]);
+      // Save account data to Firestore
+      await setDoc(
+        doc(collection(db, "Account", USER_ID, "data"), userid),
+        accountData
+      );
+
+      // Reset form and notify user
       setFormData({
-        accountHolderName: "",
-        accountNumber: "",
-        confirmAccountNumber: "",
-        ifscCode: "",
-        bankName: "",
+        Accountname: "",
+        Accountnumber: "",
+        confirmAccountnumber: "",
+        Bankname: "",
+        ifsccode: "",
       });
-      setShowForm(false);
       alert("Account added successfully!");
+      navigation.goBack(); // Navigate back (if using React Router or similar)
     } catch (error) {
       console.error("Error adding account:", error.message);
       alert("Failed to add account. Please try again.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Hide loading indicator
     }
   };
-
   return (
     <div className="bg-gray-100 min-h-screen p-4">
       <h1 className="text-2xl font-bold mb-4">Add Account</h1>
@@ -110,11 +134,13 @@ const AddAccountPage = () => {
                 className="bg-white p-4 rounded shadow-md border"
               >
                 <h3 className="text-gray-800 font-bold">
-                  {account.accountHolderName}
+                  {account?.Accountname}
                 </h3>
-                <p className="text-gray-600">Account: {account.accountNumber}</p>
-                <p className="text-gray-600">Bank: {account.bankName}</p>
-                <p className="text-gray-600">IFSC: {account.ifscCode}</p>
+                <p className="text-gray-600">
+                  Account: {account?.Accountnumber}
+                </p>
+                <p className="text-gray-600">Bank: {account?.Bankname}</p>
+                <p className="text-gray-600">IFSC: {account?.ifsccode}</p>
               </div>
             ))}
           </div>
@@ -142,8 +168,8 @@ const AddAccountPage = () => {
             </label>
             <input
               type="text"
-              name="accountHolderName"
-              value={formData.accountHolderName}
+              name="Accountname"
+              value={formData.Accountname}
               onChange={handleChange}
               placeholder="Enter account holder name"
               className="w-full p-2 border rounded"
@@ -158,8 +184,8 @@ const AddAccountPage = () => {
             </label>
             <input
               type="text"
-              name="accountNumber"
-              value={formData.accountNumber}
+              name="Accountnumber"
+              value={formData.Accountnumber}
               onChange={handleChange}
               placeholder="Enter account number"
               className="w-full p-2 border rounded"
@@ -175,8 +201,8 @@ const AddAccountPage = () => {
             </label>
             <input
               type="text"
-              name="confirmAccountNumber"
-              value={formData.confirmAccountNumber}
+              name="confirmAccountnumber"
+              value={formData.confirmAccountnumber}
               onChange={handleChange}
               placeholder="Re-enter account number"
               className="w-full p-2 border rounded"
@@ -191,8 +217,9 @@ const AddAccountPage = () => {
             </label>
             <input
               type="text"
-              name="ifscCode"
-              value={formData.ifscCode}
+              name="ifsccode"
+              value={formData.ifsccode}
+              maxLength={11}
               onChange={handleChange}
               placeholder="Enter IFSC code"
               className="w-full p-2 border rounded"
@@ -202,11 +229,13 @@ const AddAccountPage = () => {
 
           {/* Bank Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">Bank Name</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Bank Name
+            </label>
             <input
               type="text"
-              name="bankName"
-              value={formData.bankName}
+              name="Bankname"
+              value={formData.Bankname}
               onChange={handleChange}
               placeholder="Enter bank name"
               className="w-full p-2 border rounded"
